@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rwb.dao.PostMapper">
+
+	<resultMap type="com.rwb.entity.Post" id="postAndUserMap">
+		<id column="pid" property="pid"/>
+        <result column="title" property="title"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="reply_time" property="replyTime"/>
+        <result column="reply_count" property="replyCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="scan_count" property="scanCount"/>
+		<association property="user" javaType="com.rwb.entity.User">
+			<id column="uid" property="uid"></id>
+	        <result column="username" property="username"></result>
+	        <result column="head_url" property="headUrl"></result>
+		</association>
+	</resultMap>
+
+	<!-- 查询帖子总条数 -->
+	<select id="findPostCount" resultType="long">
+		SELECT 
+			COUNT(1)
+		FROM 
+			post
+	</select>
+	
+	<!-- 分页查询帖子信息 -->
+	<select id="findPagingPost" resultMap="postAndUserMap">
+		SELECT
+			u.uid,u.username,u.head_url,p.pid,p.title,p.publish_time,p.reply_time,p.reply_count,p.like_count,p.scan_count
+		FROM
+			post p
+		JOIN
+			user u
+		ON
+			p.uid = u.uid
+		ORDER BY
+			p.reply_time desc
+		LIMIT
+			#{offset}, #{pageSize}
+	</select>
+	
+	<!-- 获取用户所拥有的帖子 -->
+	<select id="findPostListByUid" resultType="post" parameterType="int">
+		SELECT
+			uid,pid,title,publish_time
+		FROM
+			 post
+	    WHERE
+	    	 uid=#{uid}
+	</select>
+
+</mapper>
